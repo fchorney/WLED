@@ -111,6 +111,16 @@
 #define DARKSLATEGRAY (uint32_t)0x2F4F4F
 #define DARKSLATEGREY DARKSLATEGRAY
 
+// SMX Specific Colors
+#define SMX_BEGINNER    (uint32_t)0x5CFF03
+#define SMX_EASY        (uint32_t)0xFFC107
+#define SMX_HARD        (uint32_t)0xED1C00
+#define SMX_WILD        (uint32_t)0x9212FF
+#define SMX_DUAL        (uint32_t)0x00BAFF
+#define SMX_FULL        (uint32_t)0x00FFB4
+#define SMX_TEAM        (uint32_t)0xFE0072
+#define SMX_EDIT        (uint32_t)0x86FFFF
+
 // segment options
 #define NO_OPTIONS   (uint16_t)0x0000
 #define TRANSPOSED   (uint16_t)0x0100 // rotated 90deg & reversed
