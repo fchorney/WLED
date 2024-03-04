@@ -88,31 +88,6 @@ static const char _data_FX_MODE_STATIC[] PROGMEM = "Solid";
 /////////////////////
 //   ** SMX BPM    //
 /////////////////////
-
-/*
- * SMX Fade To Black
- */
-uint32_t smx_fade_to_black(uint8_t rate) {
-  // Map 0-255 to 10-1 to get a smaller fade range than the original `fade_out` function
-  float mappedRate = (float(rate) - 0.0f) * (1.0f - 10.0f) / (255.0f - 0.0f) + 10.0f;
-
-  // Get Pixel Color
-  uint32_t color = SEGMENT.getPixelColor(0);
-
-  // Get color delta for each color value
-  uint8_t c[] = {R(color), G(color), B(color), W(color)};
-  uint8_t delta = 0;
-  for (int i = 0; i < 4; i++) {
-    // Get Delta
-    delta = c[i] / mappedRate;
-    // If fade isn't complete, make sure delta is at least 1 (fixes rounding issues)
-    c[i] -= delta - ((c[i] == 0) ? 0 : (c[i] < 0) ? 1 : -1);
-  }
-
-  // Return faded color
-  return RGBW32(c[0], c[1], c[2], c[3]);
-}
-
 uint16_t mode_smx_bpm(void) {
   // BPM as a whole number
   uint32_t bpm = SEGMENT.speed;
@@ -124,10 +99,14 @@ uint16_t mode_smx_bpm(void) {
   // Last beat value is stored in aux0, check if the beat has rolled over indicating a new beat
   if (SEGMENT.aux0 >= beat) {
     // Beat has rolled over, set given color
-    SEGMENT.fill(SEGCOLOR(0));
+    for (int i = 0; i < SEGLEN; i++) {
+      SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+    }
   } else {
     // Otherwise, fade to black using given decay time
-    SEGMENT.fill(smx_fade_to_black(decayTime));
+    for (int i = 0; i < SEGLEN; i++) {
+      SEGMENT.setPixelColor(i, color_fade(SEGMENT.getPixelColor(i), map(decayTime, 0, 255, 235, 125)));
+    }
   }
 
   // Save the current beat value in aux0
@@ -135,7 +114,7 @@ uint16_t mode_smx_bpm(void) {
 
   return FRAMETIME;
 }
-static const char _data_FX_MODE_SMX_BPM[] PROGMEM = "SMX BPM@BPM,Decay;!;;1;sx=150,ix=150";
+static const char _data_FX_MODE_SMX_BPM[] PROGMEM = "SMX BPM@BPM,Decay;!;!;1;sx=150,ix=150";
 
 /*
  * Blink/strobe function
